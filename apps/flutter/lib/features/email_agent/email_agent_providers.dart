@@ -1,0 +1,2 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart'; import 'data/email_agent_repository.dart'; import 'data/email_agent_models.dart';
+final emailAgentRepositoryProvider=Provider<EmailAgentRepository>((ref)=>throw UnimplementedError()); final emailAgentProvider=FutureProvider<EmailAgentState>((ref)=>ref.read(emailAgentRepositoryProvider).state()); final emailPolicyProvider=FutureProvider<EmailAgentPolicy>((ref)=>ref.read(emailAgentRepositoryProvider).policy());

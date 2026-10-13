@@ -1,0 +1,10 @@
+import { Hono } from 'hono';
+import { AppEnv, ApiError } from '../api_types';
+import { authMiddleware } from '../middleware/auth';
+import { processDocument } from '../agent-runtime/document_processing_service';
+export const documentRoutes = new Hono<AppEnv>();
+documentRoutes.use('*', authMiddleware);
+documentRoutes.get('/documents/:documentId/processing-status', async (c) => { const context=c.get('agentContext'); const rows=await c.get('runtimeRepository').list('documents',context.organisationId,{id:c.req.param('documentId')}); if(!rows[0]) throw new ApiError('NOT_FOUND','Document not found.'); const doc=rows[0] as any; return c.json({ documentId:doc.id, status:doc.intelligence_status ?? 'uploaded', error:doc.intelligence_error ?? null }); });
+const runProcessing = async (c: any) => { const context=c.get('agentContext'); const result=await processDocument(c.get('runtimeRepository'), context, c.req.param('documentId'), c.env); return c.json({ documentId:c.req.param('documentId'), ...result }, result.status === 'ready' ? 200 : 202); };
+documentRoutes.post('/documents/:documentId/process', runProcessing);
+documentRoutes.post('/documents/:documentId/reprocess', runProcessing);

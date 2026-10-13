@@ -1,0 +1,9 @@
+create index if not exists tender_workspaces_opportunity_fk_idx on public.tender_workspaces(opportunity_id);
+create index if not exists tender_workspaces_owner_fk_idx on public.tender_workspaces(owner_user_id);
+create index if not exists tender_requirements_organisation_fk_idx on public.tender_requirements(organisation_id);
+create index if not exists tender_requirements_business_document_fk_idx on public.tender_requirements(business_document_id);
+create index if not exists tender_documents_organisation_fk_idx on public.tender_documents(organisation_id);
+create index if not exists tender_documents_document_fk_idx on public.tender_documents(document_id);
+create index if not exists tender_drafts_organisation_fk_idx on public.tender_drafts(organisation_id);
+create index if not exists tender_drafts_created_by_agent_fk_idx on public.tender_drafts(created_by_agent_id);
+create index if not exists tender_missing_information_organisation_fk_idx on public.tender_missing_information(organisation_id);

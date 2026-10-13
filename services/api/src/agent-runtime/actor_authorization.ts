@@ -1,0 +1,2 @@
+import { ExecutionToolDefinition, ToolExecutionContext } from './types';
+export function authorizeExecutionTool(tool: ExecutionToolDefinition, context: ToolExecutionContext): void { const actor=context.actor?.type; if(!actor||!tool.allowedActors.includes(actor))throw new Error('TOOL_ACTOR_NOT_ALLOWED'); if(!context.organisationId)throw new Error('ORGANISATION_SCOPE_REQUIRED'); if(actor==='agent'&&!context.agentId)throw new Error('AGENT_ID_REQUIRED'); if(actor==='user'&&!context.userId)throw new Error('USER_ID_REQUIRED'); }

@@ -1,0 +1,1 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';import 'data/workforce_repository.dart';final workforceRepositoryProvider=Provider<WorkforceRepository>((ref)=>throw UnimplementedError());final workforceSummaryProvider=FutureProvider<Map<String,dynamic>>((ref)=>ref.read(workforceRepositoryProvider).summary());

@@ -1,0 +1,104 @@
+Resolving dependencies...
+Downloading packages...
++ _fe_analyzer_shared 99.0.0 (108.0.0 available)
++ analyzer 12.1.0 (14.4.0 available)
++ app_links 6.4.1 (7.2.1 available)
++ app_links_linux 1.0.3
++ app_links_platform_interface 2.0.4
++ app_links_web 1.0.4
++ args 2.7.0
++ cli_config 0.2.0
+  clock 1.1.2 (1.1.3 available)
++ code_assets 1.2.1 (2.1.0 available)
++ convert 3.1.2
++ coverage 1.15.1
++ crypto 3.0.7
++ dart_jsonwebtoken 3.4.1
++ ffi 2.2.0
++ file 7.0.1
+  flutter_lints 5.0.0 (6.0.0 available)
++ flutter_riverpod 3.1.0 (3.4.3 available)
++ flutter_web_plugins 0.0.0 from sdk flutter
++ frontend_server_client 4.0.0
++ functions_client 2.5.0 (2.7.1 available)
++ glob 2.2.0
++ go_router 17.1.0 (18.0.1 available)
++ gotrue 2.18.0 (2.27.2 available)
++ gtk 2.2.0
++ hooks 2.0.2 (2.2.0 available)
++ http 1.6.0
++ http_multi_server 3.2.2
++ http_parser 4.1.2
++ io 1.1.0
++ jni 1.0.3
++ jni_flutter 1.0.3
++ jni_util 1.0.0
++ jwt_decode 0.3.1
+  lints 5.1.1 (6.1.0 available)
++ logging 1.3.0
+  matcher 0.12.19 (0.12.20 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  meta 1.18.0 (1.19.0 available)
++ mime 2.1.0
++ node_preamble 2.0.2
++ objective_c 9.5.0 (9.6.0 available)
++ package_config 2.2.0 (3.0.0 available)
++ path_provider 2.1.6
++ path_provider_android 2.3.1
++ path_provider_foundation 2.6.0
++ path_provider_linux 2.2.2
++ path_provider_platform_interface 2.1.3
++ path_provider_windows 2.3.0
++ platform 3.2.0
++ plugin_platform_interface 2.1.8
++ pointycastle 4.0.0
++ pool 1.5.3
++ postgrest 2.6.0 (2.9.1 available)
++ pub_semver 2.2.1
++ realtime_client 2.7.0 (2.13.0 available)
++ record_use 0.6.0 (1.1.1 available)
++ retry 3.1.2
++ riverpod 3.1.0 (3.4.3 available)
++ rxdart 0.28.0
++ shared_preferences 2.5.5
++ shared_preferences_android 2.4.28
++ shared_preferences_foundation 2.5.7
++ shared_preferences_linux 2.4.1
++ shared_preferences_platform_interface 2.4.2
++ shared_preferences_web 2.4.3
++ shared_preferences_windows 2.4.1
++ shelf 1.4.2
++ shelf_packages_handler 3.0.2
++ shelf_static 1.1.3
++ shelf_web_socket 3.0.0
++ source_map_stack_trace 2.1.2
++ source_maps 0.10.14
+  stack_trace 1.12.1 (1.12.2 available)
++ state_notifier 1.0.0
++ storage_client 2.4.1 (2.8.0 available)
++ supabase 2.10.2 (2.16.1 available)
++ supabase_flutter 2.12.0 (2.17.2 available)
++ test 1.31.0 (1.32.0 available)
+  test_api 0.7.11 (0.7.14 available)
++ test_core 0.6.17 (0.6.20 available)
++ typed_data 1.4.0
++ url_launcher 6.3.2
++ url_launcher_android 6.3.33
++ url_launcher_ios 6.4.2
++ url_launcher_linux 3.2.3
++ url_launcher_macos 3.2.6
++ url_launcher_platform_interface 2.3.2
++ url_launcher_web 2.4.3
++ url_launcher_windows 3.1.6
+  vector_math 2.2.0 (2.4.3 available)
++ watcher 1.2.1
++ web 1.1.1
++ web_socket 1.0.1
++ web_socket_channel 3.0.3
++ webkit_inspection_protocol 1.2.1
++ xdg_directories 1.1.0
++ yaml 3.1.4
++ yet_another_json_isolate 2.1.0 (2.1.1 available)
+Changed 90 dependencies!
+30 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.

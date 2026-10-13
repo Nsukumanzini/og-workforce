@@ -1,0 +1,8 @@
+{
+  "name": "og-workforce-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "vars": { "AI_PROVIDER": "groq", "EMBEDDING_PROVIDER": "configured" },
+  "triggers": { "crons": ["15 6 * * *"] }
+}

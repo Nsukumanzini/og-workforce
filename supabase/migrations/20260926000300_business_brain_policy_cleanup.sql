@@ -1,0 +1,3 @@
+-- Keep member reads separate from role-specific writes so Supabase does not
+-- evaluate overlapping permissive policies for the same operation.
+-- Applied through the Supabase plugin; this file is the repository record.

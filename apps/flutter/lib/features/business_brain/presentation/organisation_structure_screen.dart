@@ -1,0 +1,2 @@
+import 'package:flutter/material.dart';
+class OrganisationStructureScreen extends StatelessWidget { const OrganisationStructureScreen({super.key, required this.table, required this.title, required this.fields}); final String table; final String title; final List<String> fields; @override Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: Text(title)), body: ListView(padding: const EdgeInsets.all(16), children: fields.map((field) => ListTile(title: Text(field.replaceAll('_', ' ')))).toList())); }
