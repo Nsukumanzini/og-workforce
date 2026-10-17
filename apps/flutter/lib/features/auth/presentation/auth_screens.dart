@@ -51,7 +51,45 @@ class SignUpScreen extends ConsumerStatefulWidget { const SignUpScreen({super.ke
 class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   final _form = GlobalKey<FormState>(); final _name = TextEditingController(); final _email = TextEditingController(); final _password = TextEditingController(); final _confirm = TextEditingController(); bool _accepted = false; bool _busy = false;
   @override void dispose() { _name.dispose(); _email.dispose(); _password.dispose(); _confirm.dispose(); super.dispose(); }
-  Future<void> _submit() async { if (!_form.currentState!.validate() || !_accepted) { if (!_accepted) _message('Accept the Terms and Privacy Policy to continue.'); return; } setState(() => _busy = true); try { await ref.read(authControllerProvider.notifier).signUp(_name.text, _email.text, _password.text); if (mounted) _message('Account created. If this environment requires email confirmation, check your inbox before signing in.'); } on AppFailure catch (e) { if (mounted) _message(e.message); } finally { if (mounted) setState(() => _busy = false); } }
+  Future<void> _submit() async {
+    if (!_form.currentState!.validate() || !_accepted) {
+      if (!_accepted) _message('Accept the Terms and Privacy Policy to continue.');
+      return;
+    }
+    setState(() => _busy = true);
+    try {
+      await ref.read(authControllerProvider.notifier).signUp(_name.text, _email.text, _password.text);
+      if (mounted) _message('Account created. If this environment requires email confirmation, check your inbox before signing in.');
+    } catch (error) {
+      _logSignupFailure(error);
+      if (mounted) {
+        _message(error is AppFailure
+            ? error.message
+            : 'We could not reach the signup service. Open the browser console for a safe diagnostic.');
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  void _logSignupFailure(Object error) {
+    final technicalMessage = error is AppFailure
+        ? (error.technicalMessage ?? error.message)
+        : error.toString();
+    var safeMessage = technicalMessage;
+    for (final value in [_name.text, _email.text, _password.text, _confirm.text]) {
+      if (value.isNotEmpty) safeMessage = safeMessage.replaceAll(value, '[redacted]');
+    }
+    safeMessage = safeMessage
+        .replaceAll(RegExp(r'https?://[^\s?]+\?[^\s]+'), '[URL with query redacted]')
+        .replaceAll(RegExp(r'\beyJ[a-zA-Z0-9_-]{8,}\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\b'), '[token redacted]')
+        .replaceAll(RegExp(r'\bsb_(publishable|secret)_[a-zA-Z0-9_-]+\b'), '[Supabase key redacted]')
+        .replaceAll(RegExp(r'authorization\s*[:=]\s*(?:bearer\s+)?[^\s,;]+(?:\s+[^\s,;]+)?', caseSensitive: false), '[authorization redacted]')
+        .replaceAll(RegExp(r'(apikey|access_token|refresh_token|password|secret_key)\s*[:=]\s*["\x27]?[^\s,;"\x27}]+["\x27]?', caseSensitive: false), '[credential redacted]');
+    debugPrint('[signup] Supabase signup request failed (${error.runtimeType}): $safeMessage');
+    debugPrint('[signup] Diagnosis hints: net::ERR_NAME_NOT_RESOLVED means hostname/DNS resolution failed; '
+        'CORS errors mean the API did not allow this site origin; HTTP 4xx/5xx details indicate a server response.');
+  }
   void _message(String text) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
   @override Widget build(BuildContext context) => AuthPage(title: 'Create your account', subtitle: 'Start with your identity. Business details come next.', child: Form(key: _form, child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
     TextFormField(controller: _name, validator: (v) => Validators.required(v, label: 'Full name'), textCapitalization: TextCapitalization.words, decoration: const InputDecoration(labelText: 'Full name')), const SizedBox(height: 16),

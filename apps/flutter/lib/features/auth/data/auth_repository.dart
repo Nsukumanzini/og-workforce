@@ -34,7 +34,7 @@ class SupabaseAuthRepository implements AuthRepository {
       );
       if (response.user == null) throw const AppFailure('We could not create your account.');
     } on AuthException catch (error) {
-      throw AppFailure(_friendly(error.message), technicalMessage: error.message);
+      throw AppFailure(_friendly(error.message), technicalMessage: error.toString());
     }
   }
 
