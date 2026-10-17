@@ -5,6 +5,7 @@ import '../../features/auth/domain/app_user.dart';
 import '../../features/auth/presentation/auth_screens.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
 import '../../features/business_brain/presentation/business_brain_screen.dart';
+import '../../features/business_brain/presentation/business_brain_module_screen.dart';
 import '../../features/business_brain/presentation/company_profile_screen.dart';
 import '../../features/business_brain/presentation/business_hours_screen.dart';
 import '../../features/business_brain/presentation/organisation_structure_screen.dart';
@@ -39,7 +40,7 @@ String? appRouteRedirect({
   if (path == '/reset-password') return null;
   final currentWorkspace = workspace.value;
   if (currentWorkspace == null || !currentWorkspace.onboardingComplete) return path == '/onboarding' ? null : '/onboarding';
-  if (path == '/dashboard' || path == '/workforce' || path == '/billing' || path == '/settings' || path == '/business-brain' || path == '/agents/business-assistant' || path == '/agents/email' || path == '/agents/voice' || path == '/crm' || path.startsWith('/crm/') || path == '/inbox' || path.startsWith('/inbox/') || path == '/agents/whatsapp' || path == '/accounts' || path.startsWith('/accounts/') || path == '/agents/accounts' || path == '/tenders') return null;
+  if (path == '/dashboard' || path == '/workforce' || path == '/billing' || path == '/settings' || path == '/business-brain' || path.startsWith('/business-brain/') || path == '/agents/business-assistant' || path == '/agents/email' || path == '/agents/voice' || path == '/crm' || path.startsWith('/crm/') || path == '/inbox' || path.startsWith('/inbox/') || path == '/agents/whatsapp' || path == '/accounts' || path.startsWith('/accounts/') || path == '/agents/accounts' || path == '/tenders' || path.startsWith('/tenders/')) return null;
   return '/dashboard';
 }
 
@@ -81,19 +82,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/tenders/:id/workspace', builder: (_, state) => TenderWorkspaceScreen(id: state.pathParameters['id']!)),
       GoRoute(path: '/business-brain', builder: (_, __) => const BusinessBrainScreen()),
       GoRoute(path: '/business-brain/company-profile', builder: (_, __) => const CompanyProfileScreen()),
-      GoRoute(path: '/business-brain/locations', builder: (_, __) => const OrganisationStructureScreen(table: 'business_locations', title: 'Locations', fields: ['name', 'location_type', 'address', 'city', 'region', 'country_code', 'postal_code', 'phone', 'email'])),
+      GoRoute(path: '/business-brain/locations', builder: (_, __) => const BusinessBrainModuleScreen(table: 'business_locations', title: 'Locations', fields: ['name', 'location_type', 'address', 'city', 'region', 'country_code', 'postal_code', 'phone', 'email', 'is_primary', 'active'])),
       GoRoute(path: '/business-brain/hours', builder: (_, __) => const BusinessHoursScreen()),
-      GoRoute(path: '/business-brain/contacts', builder: (_, __) => const OrganisationStructureScreen(table: 'business_contacts', title: 'Contacts', fields: ['full_name', 'job_title', 'department_id', 'location_id', 'email', 'phone', 'preferred_contact_method'])),
-      GoRoute(path: '/business-brain/departments', builder: (_, __) => const OrganisationStructureScreen(table: 'departments', title: 'Departments', fields: ['name'])),
-      GoRoute(path: '/business-brain/products', builder: (_, __) => const CommercialCoreScreen(table: 'products', title: 'Products', fields: ['name', 'sku', 'category', 'description', 'price', 'currency', 'tax_behavior', 'unit', 'minimum_price', 'maximum_ai_discount_percent', 'availability_status', 'customer_notes', 'internal_notes'])),
-      GoRoute(path: '/business-brain/services', builder: (_, __) => const CommercialCoreScreen(table: 'services', title: 'Services', fields: ['name', 'category', 'description', 'pricing_model', 'price', 'currency', 'tax_behavior', 'estimated_duration_minutes', 'deposit_value', 'maximum_discount_percent', 'service_area', 'customer_notes', 'internal_notes'])),
-      GoRoute(path: '/business-brain/packages', builder: (_, __) => const CommercialCoreScreen(table: 'packages', title: 'Packages', fields: ['name', 'description', 'price', 'currency', 'tax_behavior', 'valid_from', 'valid_until', 'customer_terms'])),
-      GoRoute(path: '/business-brain/pricing', builder: (_, __) => const CommercialCoreScreen(table: 'pricing_rules', title: 'Pricing Rules', fields: ['default_currency', 'default_vat_percent', 'payment_terms', 'deposit_percent', 'quotation_valid_days', 'invoice_due_days', 'maximum_automatic_discount_percent', 'call_out_fee', 'delivery_fee', 'minimum_order_value', 'cancellation_fee', 'late_payment_policy'])),
-      GoRoute(path: '/business-brain/engagement', builder: (_, __) => const CustomerEngagementScreen()),
-      GoRoute(path: '/business-brain/languages', builder: (_, __) => const LanguagesScreen()),
-      GoRoute(path: '/business-brain/escalations', builder: (_, __) => const OrganisationStructureScreen(table: 'escalation_contacts', title: 'Escalation Contacts', fields: ['category', 'primary_contact_id', 'secondary_contact_id', 'phone', 'email', 'availability_notes', 'priority'])),
-      GoRoute(path: '/business-brain/knowledge', builder: (_, __) => const KnowledgeEntriesScreen(type: 'faq')),
-      GoRoute(path: '/business-brain/policies', builder: (_, __) => const KnowledgeEntriesScreen(type: 'policy')),
+      GoRoute(path: '/business-brain/contacts', builder: (_, __) => const BusinessBrainModuleScreen(table: 'business_contacts', title: 'Contacts', fields: ['full_name', 'job_title', 'department_id', 'location_id', 'email', 'phone', 'preferred_contact_method', 'active'])),
+      GoRoute(path: '/business-brain/departments', builder: (_, __) => const BusinessBrainModuleScreen(table: 'departments', title: 'Departments', fields: ['name', 'active'])),
+      GoRoute(path: '/business-brain/products', builder: (_, __) => const BusinessBrainModuleScreen(table: 'products', title: 'Products', fields: ['name', 'sku', 'category', 'description', 'price', 'currency', 'tax_behavior', 'unit', 'minimum_price', 'maximum_ai_discount_percent', 'availability_status', 'customer_notes', 'internal_notes', 'active'])),
+      GoRoute(path: '/business-brain/services', builder: (_, __) => const BusinessBrainModuleScreen(table: 'services', title: 'Services', fields: ['name', 'category', 'description', 'pricing_model', 'price', 'currency', 'tax_behavior', 'estimated_duration_minutes', 'deposit_value', 'maximum_discount_percent', 'service_area', 'customer_notes', 'internal_notes', 'active'])),
+      GoRoute(path: '/business-brain/packages', builder: (_, __) => const BusinessBrainModuleScreen(table: 'packages', title: 'Packages', fields: ['name', 'description', 'price', 'currency', 'tax_behavior', 'valid_from', 'valid_until', 'customer_terms', 'active'])),
+      GoRoute(path: '/business-brain/pricing', builder: (_, __) => const BusinessBrainModuleScreen(table: 'pricing_rules', title: 'Pricing Rules', fields: ['default_currency', 'vat_registered', 'default_vat_percent', 'payment_terms', 'deposit_percent', 'quotation_valid_days', 'invoice_due_days', 'discounts_allowed', 'maximum_automatic_discount_percent', 'negotiation_allowed', 'call_out_fee', 'delivery_fee', 'minimum_order_value', 'cancellation_fee', 'late_payment_policy'])),
+      GoRoute(path: '/business-brain/engagement', builder: (_, __) => const BusinessBrainModuleScreen(table: 'customer_engagement_profiles', title: 'Customer Engagement', description: 'Set the tone, channels, and follow-up guidelines that shape customer conversations.', fields: ['customer_types', 'target_locations', 'preferred_channels', 'communication_tone', 'guidance', 'preferred_greeting', 'preferred_closing', 'supported_languages', 'follow_up_allowed', 'follow_up_interval_hours', 'maximum_follow_up_attempts', 'stop_contact_rules', 'prices_may_be_discussed', 'discounts_may_be_mentioned', 'complaint_handling_instructions', 'vip_handling_notes'])),
+      GoRoute(path: '/business-brain/languages', builder: (_, __) => const BusinessBrainModuleScreen(table: 'organisation_languages', title: 'Languages', description: 'Add language codes such as en, zu, or af. Set one language as the default.', fields: ['language_code', 'is_default'])),
+      GoRoute(path: '/business-brain/escalations', builder: (_, __) => const BusinessBrainModuleScreen(table: 'escalation_contacts', title: 'Escalation Contacts', fields: ['category', 'primary_contact_id', 'secondary_contact_id', 'phone', 'email', 'availability_notes', 'priority', 'active'])),
+      GoRoute(path: '/business-brain/knowledge', builder: (_, __) => const BusinessBrainModuleScreen(table: 'knowledge_entries', title: 'FAQs', description: 'Record answers the AI team can use. Keep customer visibility turned off for internal guidance.', fixedValues: {'entry_type': 'faq'}, fields: ['title', 'category', 'content', 'customer_visible', 'active'])),
+      GoRoute(path: '/business-brain/policies', builder: (_, __) => const BusinessBrainModuleScreen(table: 'knowledge_entries', title: 'Policies', description: 'Add clear policy guidance for consistent customer responses.', fixedValues: {'entry_type': 'policy'}, fields: ['title', 'category', 'content', 'customer_visible', 'active'])),
       GoRoute(path: '/business-brain/documents', builder: (_, __) => const DocumentVaultScreen()),
       GoRoute(path: '/business-brain/activity', builder: (_, __) => const BusinessBrainActivityScreen()),
     ],

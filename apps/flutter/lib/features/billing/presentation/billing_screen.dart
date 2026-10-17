@@ -33,7 +33,7 @@ class BillingScreen extends ConsumerWidget {
             plans.when(
               loading: () => const LinearProgressIndicator(),
               error: (error, _) => _ErrorState(message: '$error', onRetry: () => ref.invalidate(billingPlansProvider)),
-              data: (items) => Column(children: items.where((plan) => plan.active).map(_PlanCard.new).toList()),
+            data: (items) => Column(children: items.where((plan) => plan.active).map((plan) => _PlanCard(plan, onSelected: () => _showPlanDetails(context, plan))).toList()),
             ),
           ],
         ),
@@ -72,7 +72,15 @@ class _StatusContent extends StatelessWidget {
             const SizedBox(height: 4),
             const Text('Plan and usage tracking are available. Online subscription payments will be connected during final integration.'),
             const SizedBox(height: 12),
-            const OutlinedButton(onPressed: null, child: Text('Payments not yet connected')),
+            OutlinedButton.icon(
+              onPressed: () => showDialog<void>(context: context, builder: (context) => AlertDialog(
+                title: const Text('Payments are not connected yet'),
+                content: const Text('You can review your plan and usage here. Online checkout will be available after a payment provider is connected.'),
+                actions: [FilledButton(onPressed: () => Navigator.pop(context), child: const Text('Got it'))],
+              )),
+              icon: const Icon(Icons.info_outline_rounded),
+              label: const Text('Payment setup details'),
+            ),
           ]))),
         ],
       );
@@ -96,22 +104,53 @@ class _UsageRow extends StatelessWidget {
 }
 
 class _PlanCard extends StatelessWidget {
-  const _PlanCard(this.plan);
+  const _PlanCard(this.plan, {required this.onSelected});
 
   final BillingPlan plan;
+  final VoidCallback onSelected;
 
   @override
   Widget build(BuildContext context) {
     final price = plan.monthlyPrice == null ? null : '${plan.currency} ${plan.monthlyPrice} / month';
-    return Card(child: Padding(padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(plan.name, style: Theme.of(context).textTheme.titleMedium),
+    return Card(clipBehavior: Clip.antiAlias, child: InkWell(onTap: onSelected, child: Padding(padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Row(children: [
+        Expanded(child: Text(plan.name, style: Theme.of(context).textTheme.titleMedium)),
+        const Icon(Icons.open_in_new_rounded, size: 18),
+      ]),
       if (plan.description != null) ...[const SizedBox(height: 4), Text(plan.description!)],
       if (price != null) ...[const SizedBox(height: 4), Text(price)],
       const SizedBox(height: 8),
       ...plan.features.take(4).map((feature) => Padding(padding: const EdgeInsets.only(bottom: 3), child: Text('• ${_label(feature)}'))),
-    ])));
+    ]))));
   }
 }
+
+Future<void> _showPlanDetails(BuildContext context, BillingPlan plan) => showDialog<void>(
+  context: context,
+  builder: (context) => AlertDialog(
+    title: Text(plan.name),
+    content: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+      if (plan.description != null) Text(plan.description!),
+      if (plan.monthlyPrice != null) ...[
+        const SizedBox(height: 12),
+        Text('${plan.currency} ${plan.monthlyPrice} per month', style: Theme.of(context).textTheme.titleMedium),
+      ],
+      const SizedBox(height: 14),
+      const Text('Included'),
+      const SizedBox(height: 6),
+      ...plan.features.map((feature) => Padding(padding: const EdgeInsets.only(bottom: 4), child: Text('• ${_label(feature)}'))),
+      if (plan.limits.isNotEmpty) ...[
+        const SizedBox(height: 12),
+        const Text('Usage limits'),
+        const SizedBox(height: 6),
+        ...plan.limits.entries.map((entry) => Text('${_label(entry.key)}: ${entry.value}')),
+      ],
+      const SizedBox(height: 14),
+      Text('Online plan changes are not available while the payment provider is disconnected.', style: Theme.of(context).textTheme.bodySmall),
+    ])),
+    actions: [FilledButton(onPressed: () => Navigator.pop(context), child: const Text('Close'))],
+  ),
+);
 
 class _ErrorState extends StatelessWidget {
   const _ErrorState({required this.message, required this.onRetry});

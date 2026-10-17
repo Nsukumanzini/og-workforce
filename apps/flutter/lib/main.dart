@@ -24,23 +24,28 @@ Future<void> main() async {
   AuthRepository authRepository = const UnconfiguredAuthRepository();
   WorkspaceRepository workspaceRepository = const UnconfiguredWorkspaceRepository();
   BusinessBrainRepository businessBrainRepository = const UnconfiguredBusinessBrainRepository();
+  SupabaseClient? supabaseClient;
   if (config.isConfigured) {
     await Supabase.initialize(url: config.supabaseUrl, anonKey: config.supabasePublishableKey);
-    authRepository = SupabaseAuthRepository(Supabase.instance.client);
-    workspaceRepository = SupabaseWorkspaceRepository(Supabase.instance.client);
-    businessBrainRepository = SupabaseBusinessBrainRepository(Supabase.instance.client);
+    supabaseClient = Supabase.instance.client;
+    authRepository = SupabaseAuthRepository(supabaseClient);
+    workspaceRepository = SupabaseWorkspaceRepository(supabaseClient);
+    businessBrainRepository = SupabaseBusinessBrainRepository(supabaseClient);
   }
+  final client = supabaseClient;
   runApp(ProviderScope(overrides: [
     authRepositoryProvider.overrideWithValue(authRepository),
     workspaceRepositoryProvider.overrideWithValue(workspaceRepository),
     businessBrainRepositoryProvider.overrideWithValue(businessBrainRepository),
-    businessAssistantRepositoryProvider.overrideWithValue(BusinessAssistantRepository(config.apiBaseUrl, Supabase.instance.client)),
-    crmInboxRepositoryProvider.overrideWithValue(CrmInboxRepository(config.apiBaseUrl, Supabase.instance.client)),
-    accountsRepositoryProvider.overrideWithValue(AccountsRepository(config.apiBaseUrl, Supabase.instance.client)),
-    tendersRepositoryProvider.overrideWithValue(TendersRepository(config.apiBaseUrl, Supabase.instance.client)),
-    emailAgentRepositoryProvider.overrideWithValue(EmailAgentRepository(config.apiBaseUrl, Supabase.instance.client)),
-    voiceRepositoryProvider.overrideWithValue(VoiceReceptionistRepository(config.apiBaseUrl, Supabase.instance.client)),
-    workforceRepositoryProvider.overrideWithValue(WorkforceRepository(config.apiBaseUrl, Supabase.instance.client)),
-    billingRepositoryProvider.overrideWithValue(BillingRepository(config.apiBaseUrl, Supabase.instance.client)),
+    if (client != null) ...[
+      businessAssistantRepositoryProvider.overrideWithValue(BusinessAssistantRepository(config.apiBaseUrl, client)),
+      crmInboxRepositoryProvider.overrideWithValue(CrmInboxRepository(config.apiBaseUrl, client)),
+      accountsRepositoryProvider.overrideWithValue(AccountsRepository(config.apiBaseUrl, client)),
+      tendersRepositoryProvider.overrideWithValue(TendersRepository(config.apiBaseUrl, client)),
+      emailAgentRepositoryProvider.overrideWithValue(EmailAgentRepository(config.apiBaseUrl, client)),
+      voiceRepositoryProvider.overrideWithValue(VoiceReceptionistRepository(config.apiBaseUrl, client)),
+      workforceRepositoryProvider.overrideWithValue(WorkforceRepository(config.apiBaseUrl, client)),
+      billingRepositoryProvider.overrideWithValue(BillingRepository(config.apiBaseUrl, client)),
+    ],
   ], child: const WorkforceApp()));
 }

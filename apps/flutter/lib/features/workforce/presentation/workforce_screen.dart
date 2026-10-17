@@ -61,7 +61,9 @@ class WorkforceScreen extends ConsumerWidget {
                     Text(status, style: Theme.of(context).textTheme.bodyMedium),
                   ])),
                   trailing: const Icon(Icons.arrow_forward_rounded, size: 18),
-                  onTap: route == null ? null : () => context.go('$route'),
+                  onTap: route is String && route.isNotEmpty
+                      ? () => context.go(route)
+                      : () => _showTeammate(context, name, status),
                 )));
               }),
           ]),
@@ -70,6 +72,30 @@ class WorkforceScreen extends ConsumerWidget {
     ),
   );
 }
+
+Future<void> _showTeammate(BuildContext context, String name, String status) =>
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(name),
+        content: Text('$name is currently $status. There is no dedicated control screen for this teammate yet.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
+          if (name.toLowerCase().contains('account'))
+            TextButton(onPressed: () { Navigator.pop(context); context.go('/agents/accounts'); }, child: const Text('Open agent')),
+          if (name.toLowerCase().contains('tender'))
+            TextButton(onPressed: () { Navigator.pop(context); context.go('/tenders'); }, child: const Text('Open agent')),
+          if (name.toLowerCase().contains('whatsapp'))
+            TextButton(onPressed: () { Navigator.pop(context); context.go('/agents/whatsapp'); }, child: const Text('Open agent')),
+          if (name.toLowerCase().contains('email'))
+            TextButton(onPressed: () { Navigator.pop(context); context.go('/agents/email'); }, child: const Text('Open agent')),
+          if (name.toLowerCase().contains('voice'))
+            TextButton(onPressed: () { Navigator.pop(context); context.go('/agents/voice'); }, child: const Text('Open agent')),
+          if (name.toLowerCase().contains('business assistant'))
+            TextButton(onPressed: () { Navigator.pop(context); context.go('/agents/business-assistant'); }, child: const Text('Open agent')),
+        ],
+      ),
+    );
 
 class _StatCard extends StatelessWidget {
   const _StatCard({required this.label, required this.value, required this.icon, required this.width});

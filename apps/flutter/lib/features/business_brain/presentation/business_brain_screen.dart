@@ -9,21 +9,20 @@ class BusinessBrainScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final workspace = ref.watch(workspaceControllerProvider).value;
     final brain = ref.watch(businessBrainSnapshotProvider).value;
     final sections = <_BrainSection>[
-      _BrainSection('Company Profile', Icons.business_outlined, workspace != null, 'Legal identity and contact details', workspace != null ? 'Complete' : 'Not started', '/business-brain/company-profile'),
+      _BrainSection('Company Profile', Icons.business_outlined, brain?.companyProfile != null, 'Legal identity and contact details', brain?.companyProfile != null ? 'Complete' : 'Not started', '/business-brain/company-profile'),
       _BrainSection('Locations', Icons.location_on_outlined, false, 'Branches, offices, and operating sites', 'Not started', '/business-brain/locations'),
       _BrainSection('Business Hours', Icons.schedule_outlined, brain?.hasHours ?? false, 'Weekly operating hours and timezone', brain?.hasHours == true ? 'Configured' : 'Not configured', '/business-brain/hours'),
       _BrainSection('Contacts & Departments', Icons.contacts_outlined, brain?.hasContactOrEscalation ?? false, 'People, teams, and responsibilities', '${brain?.counts['contacts'] ?? 0} contacts', '/business-brain/contacts'),
-      _BrainSection('Products', Icons.inventory_2_outlined, brain?.activeProducts != 0, 'Customer-facing products and pricing', '${brain?.activeProducts ?? 0} active', '/business-brain/products'),
-      _BrainSection('Services', Icons.handyman_outlined, brain?.activeServices != 0, 'Services, quotes, deposits, and terms', '${brain?.activeServices ?? 0} active', '/business-brain/services'),
+      _BrainSection('Products', Icons.inventory_2_outlined, brain != null && brain.activeProducts > 0, 'Customer-facing products and pricing', '${brain?.activeProducts ?? 0} active', '/business-brain/products'),
+      _BrainSection('Services', Icons.handyman_outlined, brain != null && brain.activeServices > 0, 'Services, quotes, deposits, and terms', '${brain?.activeServices ?? 0} active', '/business-brain/services'),
       _BrainSection('Packages', Icons.layers_outlined, false, 'Simple product and service bundles', 'Not started', '/business-brain/packages'),
       _BrainSection('Pricing Rules', Icons.sell_outlined, brain?.hasPricing ?? false, 'Commercial rules and discount boundaries', brain?.hasPricing == true ? 'Configured' : 'Not configured', '/business-brain/pricing'),
       _BrainSection('Customer Engagement', Icons.forum_outlined, brain?.hasEngagement ?? false, 'Audience, tone, channels, and follow-up rules', brain?.hasEngagement == true ? 'Configured' : 'Not started', '/business-brain/engagement'),
       _BrainSection('Escalation Rules', Icons.call_merge_outlined, brain?.hasContactOrEscalation ?? false, 'Contacts for sensitive or urgent cases', '${brain?.counts['escalations'] ?? 0} configured', '/business-brain/escalations'),
       _BrainSection('FAQs & Policies', Icons.menu_book_outlined, false, 'Structured answers and customer policies', 'Not started', '/business-brain/knowledge'),
-      _BrainSection('Documents', Icons.folder_outlined, brain?.documents != 0, 'Private business documents and certificates', '${brain?.documents ?? 0} files', '/business-brain/documents'),
+      _BrainSection('Documents', Icons.folder_outlined, brain != null && brain.documents > 0, 'Private business documents and certificates', '${brain?.documents ?? 0} files', '/business-brain/documents'),
       _BrainSection('Activity', Icons.history, false, 'Safe history of Business Brain changes', 'View activity', '/business-brain/activity'),
     ];
     final completed = sections.where((section) => section.complete).length;
