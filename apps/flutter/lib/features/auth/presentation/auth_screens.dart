@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/app_providers.dart';
+import '../../../app/theme/workforce_theme.dart';
 import '../../../core/errors/app_failure.dart';
 import '../../../core/validation/validators.dart';
 
@@ -15,12 +16,39 @@ class AuthPage extends StatelessWidget {
   final String subtitle;
   final Widget child;
   @override
-  Widget build(BuildContext context) => Scaffold(body: SafeArea(child: Center(child: SingleChildScrollView(
-    padding: const EdgeInsets.all(24), child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 480), child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      Icon(Icons.hub_outlined, color: Theme.of(context).colorScheme.primary, size: 42), const SizedBox(height: 28),
-      Text(title, style: Theme.of(context).textTheme.headlineMedium), const SizedBox(height: 8), Text(subtitle), const SizedBox(height: 28), child,
-    ])),
-  ))));
+  Widget build(BuildContext context) => Scaffold(
+    body: SafeArea(
+      child: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 32),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 490),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              Center(child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 10),
+                decoration: BoxDecoration(color: WorkforceTheme.mint, borderRadius: BorderRadius.circular(16)),
+                child: const Row(mainAxisSize: MainAxisSize.min, children: [
+                  Icon(Icons.hub_rounded, color: WorkforceTheme.forest, size: 21),
+                  SizedBox(width: 9),
+                  Text('OG WORKFORCE', style: TextStyle(color: WorkforceTheme.forestDeep, fontSize: 12, letterSpacing: 1.1, fontWeight: FontWeight.w800)),
+                ]),
+              )),
+              const SizedBox(height: 30),
+              Text(title, textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineMedium),
+              const SizedBox(height: 8),
+              Text(subtitle, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+              const SizedBox(height: 25),
+              Card(
+                child: Padding(padding: const EdgeInsets.all(22), child: child),
+              ),
+              const SizedBox(height: 18),
+              Text('A clearer way to run your business.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall),
+            ]),
+          ),
+        ),
+      ),
+    ),
+  );
 }
 
 class WelcomeScreen extends StatelessWidget {
