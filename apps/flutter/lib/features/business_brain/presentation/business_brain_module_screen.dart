@@ -62,11 +62,11 @@ class _BusinessBrainModuleScreenState extends ConsumerState<BusinessBrainModuleS
   Future<void> _edit([Map<String, dynamic>? existing]) async {
     final controllers = <String, TextEditingController>{
       for (final field in widget.fields)
-        field: TextEditingController(text: _fieldText(existing?[field], field)),
+        field: TextEditingController(text: _initialFieldText(existing?[field], field)),
     };
     final saved = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => StatefulBuilder(builder: (dialogContext, setDialogState) => AlertDialog(
         title: Text(existing == null ? 'Add ${widget.title}' : 'Edit ${widget.title}'),
         content: SizedBox(
           width: 520,
@@ -79,16 +79,7 @@ class _BusinessBrainModuleScreenState extends ConsumerState<BusinessBrainModuleS
               for (final field in widget.fields)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
-                  child: TextField(
-                    controller: controllers[field],
-                    minLines: _isLongText(field) ? 3 : 1,
-                    maxLines: _isLongText(field) ? 5 : 1,
-                    keyboardType: _isNumeric(field) ? const TextInputType.numberWithOptions(decimal: true) : TextInputType.text,
-                    decoration: InputDecoration(
-                      labelText: _label(field),
-                      hintText: _isJsonList(field) ? 'Enter one item per line' : null,
-                    ),
-                  ),
+                  child: _fieldControl(field, controllers, setDialogState),
                 ),
             ]),
           ),
@@ -104,10 +95,23 @@ class _BusinessBrainModuleScreenState extends ConsumerState<BusinessBrainModuleS
               }
               final values = <String, dynamic>{...widget.fixedValues};
               for (final entry in controllers.entries) {
-                final converted = _convert(entry.key, entry.value.text.trim());
+                final text = entry.value.text.trim();
+                if (text.isEmpty) {
+                  if (_requiredFields(widget.table).contains(entry.key)) {
+                    ScaffoldMessenger.of(dialogContext).showSnackBar(SnackBar(content: Text('${_label(entry.key)} is required.')));
+                    return;
+                  }
+                  if (_isJsonList(entry.key)) {
+                    if (existing != null) values[entry.key] = <String>[];
+                  } else if (existing != null) {
+                    values[entry.key] = null;
+                  }
+                  continue;
+                }
+                final converted = _convert(entry.key, text);
                 if (identical(converted, _invalid)) {
                   ScaffoldMessenger.of(dialogContext).showSnackBar(
-                    SnackBar(content: Text('${_label(entry.key)} must be a valid ${_isBoolean(entry.key) ? 'yes/no value' : 'number'}.')),
+                    SnackBar(content: Text(_invalidFieldMessage(entry.key))),
                   );
                   return;
                 }
@@ -127,7 +131,7 @@ class _BusinessBrainModuleScreenState extends ConsumerState<BusinessBrainModuleS
             label: const Text('Save'),
           ),
         ],
-      ),
+      )),
     );
     for (final controller in controllers.values) { controller.dispose(); }
     if (saved == true) _load();
@@ -156,6 +160,34 @@ class _BusinessBrainModuleScreenState extends ConsumerState<BusinessBrainModuleS
     } catch (error) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(_friendlyError(error))));
     }
+  }
+
+  Widget _fieldControl(String field, Map<String, TextEditingController> controllers, StateSetter setDialogState) {
+    final controller = controllers[field]!;
+    if (_isBoolean(field)) {
+      return SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        title: Text(_label(field)),
+        value: controller.text.toLowerCase() == 'true',
+        onChanged: (value) => setDialogState(() => controller.text = '$value'),
+      );
+    }
+    final options = _options(field);
+    if (options != null) {
+      return DropdownButtonFormField<String>(
+        value: controller.text,
+        decoration: InputDecoration(labelText: _label(field)),
+        items: [for (final option in options) DropdownMenuItem(value: option, child: Text(_label(option)))],
+        onChanged: (value) => setDialogState(() => controller.text = value ?? ''),
+      );
+    }
+    return TextField(
+      controller: controller,
+      minLines: _isLongText(field) ? 3 : 1,
+      maxLines: _isLongText(field) ? 5 : 1,
+      keyboardType: _isNumeric(field) ? const TextInputType.numberWithOptions(decimal: true) : TextInputType.text,
+      decoration: InputDecoration(labelText: _label(field), hintText: _isJsonList(field) ? 'Enter one item per line' : null),
+    );
   }
 
   @override
@@ -219,6 +251,21 @@ const Object _invalid = Object();
 
 Object? _convert(String field, String value) {
   if (value.isEmpty) return null;
+  if (field == 'country_code') {
+    final code = value.toUpperCase();
+    return code.length == 2 ? code : _invalid;
+  }
+  if (field == 'currency' || field == 'default_currency') {
+    final code = value.toUpperCase();
+    return code.length == 3 ? code : _invalid;
+  }
+  if (const {'department_id', 'location_id', 'primary_contact_id', 'secondary_contact_id'}.contains(field)) {
+    return RegExp(r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$').hasMatch(value) ? value : _invalid;
+  }
+  if (const {'valid_from', 'valid_until', 'expires_at'}.contains(field)) {
+    final date = DateTime.tryParse(value);
+    return date == null ? _invalid : date.toIso8601String().substring(0, 10);
+  }
   if (_isBoolean(field)) {
     if (const {'true', 'yes'}.contains(value.toLowerCase())) return true;
     if (const {'false', 'no'}.contains(value.toLowerCase())) return false;
@@ -241,6 +288,41 @@ String _fieldText(Object? value, String field) {
   return value?.toString() ?? '';
 }
 
+String _initialFieldText(Object? value, String field) {
+  if (value != null) return _fieldText(value, field);
+  if (_isBoolean(field)) {
+    return const {'follow_up_allowed', 'prices_may_be_discussed', 'active'}.contains(field) ? 'true' : 'false';
+  }
+  return switch (field) {
+    'status' => 'draft',
+    'currency' || 'default_currency' => 'ZAR',
+    'location_type' => 'other',
+    'pricing_model' => 'quote_required',
+    'availability_status' => 'available',
+    _ => '',
+  };
+}
+
+Set<String> _requiredFields(String table) => switch (table) {
+  'business_locations' => {'name', 'country_code'},
+  'business_contacts' => {'full_name'},
+  'departments' => {'name'},
+  'products' || 'services' => {'name', 'currency', 'status'},
+  'packages' => {'name', 'price', 'currency'},
+  'pricing_rules' => {'default_currency'},
+  'organisation_languages' => {'language_code'},
+  'escalation_contacts' => {'category'},
+  'knowledge_entries' => {'title', 'content'},
+  _ => const {},
+};
+
+List<String>? _options(String field) => switch (field) {
+  'status' => const ['draft', 'approved', 'archived'],
+  'pricing_model' => const ['fixed', 'from', 'quote_required'],
+  'location_type' => const ['head_office', 'branch', 'warehouse', 'store', 'workshop', 'other'],
+  _ => null,
+};
+
 bool _isBoolean(String field) => const {'active', 'is_primary', 'customer_visible', 'is_default', 'follow_up_allowed', 'prices_may_be_discussed', 'discounts_may_be_mentioned', 'vat_registered', 'discounts_allowed', 'negotiation_allowed', 'deposit_required', 'negotiable'}.contains(field);
 bool _isJsonList(String field) => const {'customer_types', 'target_locations', 'preferred_channels', 'supported_languages'}.contains(field);
 bool _isInteger(String field) => const {'year_established', 'estimated_duration_minutes', 'quotation_valid_days', 'invoice_due_days', 'follow_up_interval_hours', 'maximum_follow_up_attempts', 'priority'}.contains(field);
@@ -248,6 +330,16 @@ bool _isNumeric(String field) => _isInteger(field) || const {'price', 'minimum_p
 bool _isLongText(String field) => const {'description', 'customer_notes', 'internal_notes', 'customer_terms', 'content', 'guidance', 'complaint_handling_instructions', 'vip_handling_notes', 'stop_contact_rules', 'availability_notes', 'cancellation_fee', 'late_payment_policy'}.contains(field) || field.endsWith('_notes');
 String _label(String value) => value.split('_').map((word) => word.isEmpty ? '' : '${word[0].toUpperCase()}${word.substring(1)}').join(' ');
 String _friendlyError(Object error) => error.toString().replaceFirst('Exception: ', '').replaceFirst('AppFailure: ', '');
+String _invalidFieldMessage(String field) {
+  if (_isBoolean(field)) return '${_label(field)} must be set to yes or no.';
+  if (_isInteger(field)) return '${_label(field)} must be a whole number.';
+  if (_isNumeric(field)) return '${_label(field)} must be a valid number.';
+  if (field == 'country_code') return 'Country code must be two letters, such as ZA.';
+  if (field == 'currency' || field == 'default_currency') return 'Currency must be a three-letter code, such as ZAR.';
+  if (const {'department_id', 'location_id', 'primary_contact_id', 'secondary_contact_id'}.contains(field)) return '${_label(field)} must be a valid record ID.';
+  if (const {'valid_from', 'valid_until', 'expires_at'}.contains(field)) return '${_label(field)} must be a date in YYYY-MM-DD format.';
+  return '${_label(field)} has an invalid value.';
+}
 
 class _MessageState extends StatelessWidget {
   const _MessageState({required this.message, required this.actionLabel, required this.onAction, this.icon = Icons.error_outline_rounded});

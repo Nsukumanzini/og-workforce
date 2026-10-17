@@ -17,7 +17,7 @@ class _CompanyProfileScreenState extends ConsumerState<CompanyProfileScreen> {
   bool _saving = false;
 
   static const _fields = [
-    'legal_name', 'trading_name', 'business_type', 'industry', 'description', 'slogan', 'year_established',
+    'business_type', 'industry', 'description', 'slogan', 'year_established',
     'country_code', 'region', 'city', 'physical_address', 'postal_address', 'phone', 'email', 'sales_email',
     'support_email', 'website', 'registration_number', 'vat_number', 'tax_number', 'csd_number', 'bbbee_status',
   ];
@@ -32,7 +32,9 @@ class _CompanyProfileScreenState extends ConsumerState<CompanyProfileScreen> {
   Future<void> _load() async {
     final snapshot = await ref.read(businessBrainSnapshotProvider.future);
     final profile = snapshot?.companyProfile ?? const <String, dynamic>{};
-    for (final field in _fields) { _controllers[field]!.text = profile[field]?.toString() ?? ''; }
+    for (final field in _fields) {
+      _controllers[field]!.text = profile[field]?.toString() ?? '';
+    }
     if (mounted) setState(() => _loading = false);
   }
 
@@ -47,7 +49,11 @@ class _CompanyProfileScreenState extends ConsumerState<CompanyProfileScreen> {
     try {
       await ref.read(businessBrainRepositoryProvider).save('business_profiles', workspace.id, {
         for (final field in _fields)
-          field: _controllers[field]!.text.trim().isEmpty ? null : _controllers[field]!.text.trim(),
+          field: switch (field) {
+            'year_established' => int.tryParse(_controllers[field]!.text.trim()),
+            'country_code' => _controllers[field]!.text.trim().isEmpty ? null : _controllers[field]!.text.trim().toUpperCase(),
+            _ => _controllers[field]!.text.trim().isEmpty ? null : _controllers[field]!.text.trim(),
+          },
         'organisation_id': workspace.id,
       });
       ref.invalidate(businessBrainSnapshotProvider);
@@ -60,18 +66,24 @@ class _CompanyProfileScreenState extends ConsumerState<CompanyProfileScreen> {
   @override
   Widget build(BuildContext context) {
     if (_loading) return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    Widget field(String key, String label, {int maxLines = 1, String? Function(String?)? validator}) => Padding(
+    final workspace = ref.watch(workspaceControllerProvider).value;
+    Widget field(String key, String label, {int maxLines = 1, TextInputType? keyboardType, String? Function(String?)? validator}) => Padding(
       padding: const EdgeInsets.only(bottom: 14),
-      child: TextFormField(controller: _controllers[key], maxLines: maxLines, validator: validator, decoration: InputDecoration(labelText: label)),
+      child: TextFormField(controller: _controllers[key], maxLines: maxLines, keyboardType: keyboardType, validator: validator, decoration: InputDecoration(labelText: label)),
     );
     return Scaffold(appBar: AppBar(title: const Text('Company Profile')), body: Form(key: _form, child: ListView(padding: const EdgeInsets.all(24), children: [
+      if (workspace != null) ...[
+        Text('Legal organisation name', style: Theme.of(context).textTheme.titleLarge),
+        const SizedBox(height: 8),
+        Text(workspace.name, style: Theme.of(context).textTheme.bodyLarge),
+        const SizedBox(height: 20),
+      ],
       Text('Business identity', style: Theme.of(context).textTheme.titleLarge), const SizedBox(height: 16),
-      field('legal_name', 'Legal company name', validator: (v) => Validators.required(v, label: 'Legal company name')),
-      field('trading_name', 'Trading name'), field('business_type', 'Business type'), field('industry', 'Industry'), field('description', 'Description', maxLines: 4), field('slogan', 'Tagline'), field('year_established', 'Year established'),
+      field('business_type', 'Business type'), field('industry', 'Industry'), field('description', 'Description', maxLines: 4), field('slogan', 'Tagline'), field('year_established', 'Year established', keyboardType: TextInputType.number, validator: (v) { if (v == null || v.isEmpty) return null; final year = int.tryParse(v); return year == null || year < 1800 || year > DateTime.now().year ? 'Enter a valid year.' : null; }),
       const SizedBox(height: 12), Text('Address', style: Theme.of(context).textTheme.titleLarge), const SizedBox(height: 16),
       field('country_code', 'Country code', validator: Validators.country), field('region', 'Province / state'), field('city', 'City / town'), field('physical_address', 'Physical address', maxLines: 3), field('postal_address', 'Postal address', maxLines: 3),
       const SizedBox(height: 12), Text('Contact', style: Theme.of(context).textTheme.titleLarge), const SizedBox(height: 16),
-      field('phone', 'Main phone'), field('email', 'Main email', validator: Validators.email), field('sales_email', 'Sales email', validator: (v) => v == null || v.isEmpty ? null : Validators.email(v)), field('support_email', 'Support email', validator: (v) => v == null || v.isEmpty ? null : Validators.email(v)), field('website', 'Website'),
+      field('phone', 'Main phone'), field('email', 'Main email', validator: (v) => v == null || v.isEmpty ? null : Validators.email(v)), field('sales_email', 'Sales email', validator: (v) => v == null || v.isEmpty ? null : Validators.email(v)), field('support_email', 'Support email', validator: (v) => v == null || v.isEmpty ? null : Validators.email(v)), field('website', 'Website'),
       const SizedBox(height: 12), Text('Restricted compliance information', style: Theme.of(context).textTheme.titleLarge), const SizedBox(height: 8),
       const Text('Only permitted organisation roles should edit these fields.'), const SizedBox(height: 16), field('registration_number', 'Company registration number'), field('vat_number', 'VAT number'), field('tax_number', 'Tax reference'), field('csd_number', 'CSD supplier number'), field('bbbee_status', 'B-BBEE level / status'),
       const SizedBox(height: 12), FilledButton.icon(onPressed: _saving ? null : _save, icon: _saving ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator()) : const Icon(Icons.save_outlined), label: Text(_saving ? 'Saving...' : 'Save profile')),

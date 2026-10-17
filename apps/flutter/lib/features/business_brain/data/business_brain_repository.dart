@@ -54,9 +54,12 @@ class SupabaseBusinessBrainRepository implements BusinessBrainRepository {
     final results = await Future.wait<dynamic>([
       _client.from('business_profiles').select().eq('organisation_id', organisationId).maybeSingle(),
       for (final entry in tables.entries)
-        entry.key == 'pricing' || entry.key == 'engagement'
-            ? _client.from(entry.value).select('id').eq('organisation_id', organisationId)
-            : _client.from(entry.value).select('id').eq('organisation_id', organisationId).eq('active', true),
+        switch (entry.key) {
+          'pricing' || 'engagement' => _client.from(entry.value).select('organisation_id').eq('organisation_id', organisationId),
+          'products' || 'services' => _client.from(entry.value).select('id').eq('organisation_id', organisationId).eq('status', 'approved'),
+          'documents' => _client.from(entry.value).select('id').eq('organisation_id', organisationId).isFilter('archived_at', null),
+          _ => _client.from(entry.value).select('id').eq('organisation_id', organisationId).eq('active', true),
+        },
       _client.from('business_hours').select('id').eq('organisation_id', organisationId).eq('is_open', true),
     ]);
     final profile = results.first as Map<String, dynamic>?;
@@ -94,7 +97,11 @@ class SupabaseBusinessBrainRepository implements BusinessBrainRepository {
   @override
   Future<void> archive(String table, String organisationId, String id) async {
     try {
-      await _client.from(table).update({'active': false}).eq('organisation_id', organisationId).eq('id', id);
+      final values = switch (table) {
+        'products' || 'services' => {'status': 'archived'},
+        _ => {'active': false},
+      };
+      await _client.from(table).update(values).eq('organisation_id', organisationId).eq('id', id);
     } on PostgrestException catch (error) {
       throw AppFailure('We could not archive this record.', technicalMessage: error.message);
     }
