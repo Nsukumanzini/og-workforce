@@ -1,9 +1,10 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app/app.dart';
 import 'app/app_providers.dart';
+import 'app/shell/splash_screen.dart';
 import 'core/config/app_config.dart';
 import 'features/auth/data/auth_repository.dart';
 import 'features/workspace/data/workspace_repository.dart';
@@ -20,7 +21,57 @@ import 'features/billing/billing_providers.dart'; import 'features/billing/data/
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final config = AppConfig.fromEnvironment();
+  runApp(_AppBootstrap(config: AppConfig.fromEnvironment()));
+}
+
+class _AppBootstrap extends StatefulWidget {
+  const _AppBootstrap({required this.config});
+  final AppConfig config;
+
+  @override
+  State<_AppBootstrap> createState() => _AppBootstrapState();
+}
+
+class _AppBootstrapState extends State<_AppBootstrap> {
+  late Future<Widget> _application;
+
+  @override
+  void initState() {
+    super.initState();
+    _application = _initializeApplication(widget.config);
+  }
+
+  Future<void> _retry() async {
+    setState(() => _application = _initializeApplication(widget.config));
+  }
+
+  @override
+  Widget build(BuildContext context) => FutureBuilder<Widget>(
+        future: _application,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) return snapshot.data!;
+          if (snapshot.hasError) {
+            return MaterialApp(
+              home: Scaffold(
+                body: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(mainAxisSize: MainAxisSize.min, children: [
+                      const Text('OG Workforce could not finish starting.'),
+                      const SizedBox(height: 12),
+                      FilledButton(onPressed: _retry, child: const Text('Try again')),
+                    ]),
+                  ),
+                ),
+              ),
+            );
+          }
+          return const MaterialApp(home: SplashScreen());
+        },
+      );
+}
+
+Future<Widget> _initializeApplication(AppConfig config) async {
   AuthRepository authRepository = const UnconfiguredAuthRepository();
   WorkspaceRepository workspaceRepository = const UnconfiguredWorkspaceRepository();
   BusinessBrainRepository businessBrainRepository = const UnconfiguredBusinessBrainRepository();
@@ -33,7 +84,7 @@ Future<void> main() async {
     businessBrainRepository = SupabaseBusinessBrainRepository(supabaseClient);
   }
   final client = supabaseClient;
-  runApp(ProviderScope(overrides: [
+  return ProviderScope(overrides: [
     authRepositoryProvider.overrideWithValue(authRepository),
     workspaceRepositoryProvider.overrideWithValue(workspaceRepository),
     businessBrainRepositoryProvider.overrideWithValue(businessBrainRepository),
@@ -47,5 +98,5 @@ Future<void> main() async {
       workforceRepositoryProvider.overrideWithValue(WorkforceRepository(config.apiBaseUrl, client)),
       billingRepositoryProvider.overrideWithValue(BillingRepository(config.apiBaseUrl, client)),
     ],
-  ], child: const WorkforceApp()));
+  ], child: const WorkforceApp());
 }

@@ -18,29 +18,38 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="description" content="Your business workspace and AI workforce, together in one place.">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="og_workforce_ai">
+  <meta name="apple-mobile-web-app-title" content="OG Workforce">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>og_workforce_ai</title>
+  <title>OG Workforce</title>
   <link rel="manifest" href="manifest.json">
+  <style>
+    html, body { margin: 0; min-height: 100%; background: #f7f8fb; }
+    #app-loading { position: fixed; inset: 0; display: grid; place-items: center; background: #f7f8fb; color: #183b32; font: 500 16px system-ui, sans-serif; }
+    #app-loading-content { display: grid; justify-items: center; gap: 16px; }
+    #app-loading-mark { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 20px; color: white; background: #183b32; font-size: 29px; }
+    #app-loading-track { width: 112px; height: 3px; overflow: hidden; border-radius: 3px; background: #e2e8e5; }
+    #app-loading-track::after { content: ""; display: block; width: 45%; height: 100%; border-radius: inherit; background: #b28a4a; animation: app-loading 1.15s ease-in-out infinite alternate; }
+    @keyframes app-loading { from { transform: translateX(0); } to { transform: translateX(125%); } }
+    @media (prefers-reduced-motion: reduce) { #app-loading-track::after { animation: none; width: 100%; } }
+  </style>
 </head>
 <body>
-  <!--
-    You can customize the "flutter_bootstrap.js" script.
-    This is useful to provide a custom configuration to the Flutter loader
-    or to give the user feedback during the initialization process.
-
-    For more details:
-    * https://docs.flutter.dev/platform-integration/web/initialization
-  -->
+  <div id="app-loading" role="status" aria-live="polite">
+    <div id="app-loading-content">
+      <div id="app-loading-mark" aria-hidden="true">✣</div>
+      <div>OG Workforce</div>
+      <div id="app-loading-track" aria-hidden="true"></div>
+    </div>
+  </div>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

@@ -42,9 +42,7 @@ class SupabaseBusinessBrainRepository implements BusinessBrainRepository {
 
   @override
   Future<BusinessBrainSnapshot> loadSnapshot(String organisationId) async {
-    final profile = await _client.from('business_profiles').select().eq('organisation_id', organisationId).maybeSingle();
-    final counts = <String, int>{};
-    for (final entry in const {
+    const tables = {
       'products': 'products',
       'services': 'services',
       'documents': 'documents',
@@ -52,14 +50,22 @@ class SupabaseBusinessBrainRepository implements BusinessBrainRepository {
       'escalations': 'escalation_contacts',
       'pricing': 'pricing_rules',
       'engagement': 'customer_engagement_profiles',
-    }.entries) {
-      final rows = entry.key == 'pricing' || entry.key == 'engagement'
-          ? await _client.from(entry.value).select().eq('organisation_id', organisationId)
-          : await _client.from(entry.value).select('id').eq('organisation_id', organisationId).eq('active', true);
-      counts[entry.key] = (rows as List).length;
+    };
+    final results = await Future.wait<dynamic>([
+      _client.from('business_profiles').select().eq('organisation_id', organisationId).maybeSingle(),
+      for (final entry in tables.entries)
+        entry.key == 'pricing' || entry.key == 'engagement'
+            ? _client.from(entry.value).select('id').eq('organisation_id', organisationId)
+            : _client.from(entry.value).select('id').eq('organisation_id', organisationId).eq('active', true),
+      _client.from('business_hours').select('id').eq('organisation_id', organisationId).eq('is_open', true),
+    ]);
+    final profile = results.first as Map<String, dynamic>?;
+    final counts = <String, int>{};
+    var index = 1;
+    for (final entry in tables.entries) {
+      counts[entry.key] = (results[index++] as List).length;
     }
-    final hours = await _client.from('business_hours').select('id').eq('organisation_id', organisationId).eq('is_open', true);
-    counts['hours'] = (hours as List).length;
+    counts['hours'] = (results[index] as List).length;
     return BusinessBrainSnapshot(companyProfile: profile, counts: counts);
   }
 
