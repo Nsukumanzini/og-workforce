@@ -27,5 +27,60 @@ class _BusinessHoursScreenState extends ConsumerState<BusinessHoursScreen> {
     catch (e) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Business hours could not be saved: $e'))); }
     finally { if (mounted) setState(() => saving = false); }
   }
-  @override Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: const Text('Business Hours'), actions: [IconButton(tooltip: 'Save hours', onPressed: busy || saving ? null : _save, icon: saving ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator()) : const Icon(Icons.save))]), body: busy ? const Center(child: CircularProgressIndicator()) : error != null ? Center(child: Padding(padding: const EdgeInsets.all(24), child: Column(mainAxisSize: MainAxisSize.min, children: [Text(error!), TextButton.icon(onPressed: _load, icon: const Icon(Icons.refresh), label: const Text('Try again'))]))) : Center(child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 760), child: ListView(padding: const EdgeInsets.all(16), children: [TextField(controller: timezone, decoration: const InputDecoration(labelText: 'Timezone')), const SizedBox(height: 12), ...List.generate(7, (i) => Card(child: Padding(padding: const EdgeInsets.all(12), child: Column(children: [Row(children: [Expanded(child: Text(days[i], style: Theme.of(context).textTheme.titleMedium)), Text(open[i] ? 'Open' : 'Closed'), Switch(value: open[i], onChanged: saving ? null : (v) => setState(() => open[i] = v))]), if (open[i]) Row(children: [Expanded(child: TextField(controller: from[i], keyboardType: TextInputType.datetime, decoration: const InputDecoration(labelText: 'Opens', hintText: '09:00'))), const Padding(padding: EdgeInsets.symmetric(horizontal: 10), child: Text('to')), Expanded(child: TextField(controller: to[i], keyboardType: TextInputType.datetime, decoration: const InputDecoration(labelText: 'Closes', hintText: '17:00')))])])))]))));
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(
+          title: const Text('Business Hours'),
+          actions: [
+            IconButton(
+              tooltip: 'Save hours',
+              onPressed: busy || saving ? null : _save,
+              icon: saving
+                  ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator())
+                  : const Icon(Icons.save),
+            ),
+          ],
+        ),
+        body: busy
+            ? const Center(child: CircularProgressIndicator())
+            : error != null
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(mainAxisSize: MainAxisSize.min, children: [
+                        Text(error!),
+                        TextButton.icon(onPressed: _load, icon: const Icon(Icons.refresh), label: const Text('Try again')),
+                      ]),
+                    ),
+                  )
+                : Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 760),
+                      child: ListView(
+                        padding: const EdgeInsets.all(16),
+                        children: [
+                          TextField(controller: timezone, decoration: const InputDecoration(labelText: 'Timezone')),
+                          const SizedBox(height: 12),
+                          ...List.generate(7, (i) => Card(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Column(children: [
+                                    Row(children: [
+                                      Expanded(child: Text(days[i], style: Theme.of(context).textTheme.titleMedium)),
+                                      Text(open[i] ? 'Open' : 'Closed'),
+                                      Switch(value: open[i], onChanged: saving ? null : (v) => setState(() => open[i] = v)),
+                                    ]),
+                                    if (open[i]) Row(children: [
+                                      Expanded(child: TextField(controller: from[i], keyboardType: TextInputType.datetime, decoration: const InputDecoration(labelText: 'Opens', hintText: '09:00'))),
+                                      const Padding(padding: EdgeInsets.symmetric(horizontal: 10), child: Text('to')),
+                                      Expanded(child: TextField(controller: to[i], keyboardType: TextInputType.datetime, decoration: const InputDecoration(labelText: 'Closes', hintText: '17:00'))),
+                                    ]),
+                                  ]),
+                                ),
+                              )),
+                        ],
+                      ),
+                    ),
+                  ),
+      );
 }

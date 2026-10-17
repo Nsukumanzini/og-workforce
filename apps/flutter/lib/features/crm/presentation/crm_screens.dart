@@ -71,7 +71,57 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
   String query = '';
   CrmContact? _contactFor(List<CrmContact> contacts, String id) { for (final contact in contacts) { if (contact.id == id) return contact; } return null; }
   @override
-  Widget build(BuildContext context) { final conversations = ref.watch(inboxConversationsProvider); final contacts = ref.watch(crmContactsProvider).valueOrNull ?? const <CrmContact>[]; return Scaffold(appBar: AppBar(title: const Text('Inbox'), actions: [IconButton(tooltip: 'Refresh', onPressed: () => ref.invalidate(inboxConversationsProvider), icon: const Icon(Icons.refresh))]), body: conversations.when(loading: () => const Center(child: CircularProgressIndicator()), error: (e, _) => _Failure(text: 'Inbox could not be loaded: $e', retry: () => ref.invalidate(inboxConversationsProvider)), data: (items) { final filtered = items.where((x) { final c = _contactFor(contacts, x.contactId); return '${c?.name ?? ''} ${x.channel} ${x.status}'.toLowerCase().contains(query.toLowerCase()); }).toList(); return RefreshIndicator(onRefresh: () async { ref.invalidate(inboxConversationsProvider); }, child: ListView(padding: const EdgeInsets.all(16), children: [TextField(decoration: const InputDecoration(prefixIcon: Icon(Icons.search), hintText: 'Search conversations'), onChanged: (v) => setState(() => query = v)), const SizedBox(height: 12), if (filtered.isEmpty) const _Empty(text: 'No conversations found.') else ...filtered.map((x) { final c = _contactFor(contacts, x.contactId); return Card(child: ListTile(leading: const CircleAvatar(child: Icon(Icons.chat_bubble_outline)), title: Text(c?.name ?? 'Conversation'), subtitle: Text('${x.channel} • ${x.status}'), trailing: const Icon(Icons.chevron_right), onTap: () => context.go('/inbox/${x.id}'))); })])); })); }
+  Widget build(BuildContext context) {
+    final conversations = ref.watch(inboxConversationsProvider);
+    final contacts = ref.watch(crmContactsProvider).when(
+      data: (value) => value,
+      error: (_, __) => const <CrmContact>[],
+      loading: () => const <CrmContact>[],
+    );
+    return Scaffold(
+      appBar: AppBar(title: const Text('Inbox'), actions: [
+        IconButton(tooltip: 'Refresh', onPressed: () => ref.invalidate(inboxConversationsProvider), icon: const Icon(Icons.refresh)),
+      ]),
+      body: conversations.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => _Failure(text: 'Inbox could not be loaded: $e', retry: () => ref.invalidate(inboxConversationsProvider)),
+        data: (items) {
+          final filtered = items.where((x) {
+            final c = _contactFor(contacts, x.contactId);
+            return '${c?.name ?? ''} ${x.channel} ${x.status}'.toLowerCase().contains(query.toLowerCase());
+          }).toList();
+          return RefreshIndicator(
+            onRefresh: () async => ref.invalidate(inboxConversationsProvider),
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                TextField(
+                  decoration: const InputDecoration(prefixIcon: Icon(Icons.search), hintText: 'Search conversations'),
+                  onChanged: (value) => setState(() => query = value),
+                ),
+                const SizedBox(height: 12),
+                if (filtered.isEmpty)
+                  const _Empty(text: 'No conversations found.')
+                else
+                  ...filtered.map((conversation) {
+                    final contact = _contactFor(contacts, conversation.contactId);
+                    return Card(
+                      child: ListTile(
+                        leading: const CircleAvatar(child: Icon(Icons.chat_bubble_outline)),
+                        title: Text(contact?.name ?? 'Conversation'),
+                        subtitle: Text('${conversation.channel} • ${conversation.status}'),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => context.go('/inbox/${conversation.id}'),
+                      ),
+                    );
+                  }),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
 }
 
 class ConversationScreen extends ConsumerStatefulWidget {
