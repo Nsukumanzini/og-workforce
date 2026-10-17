@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
+import { cors } from 'hono/cors';
 import { Env, serverSupabaseKey } from './api_types';
-import { errorMiddleware } from './middleware/errors';
+import { errorHandler } from './middleware/errors';
 import { healthRoutes } from './routes/health';
 import { assistantRoutes } from './routes/business_assistant';
 import { documentRoutes } from './routes/document_processing';
@@ -14,7 +15,16 @@ import { runTenderAgent } from './agent-runtime/tender_dispatcher';
 import { workforceRoutes } from './routes/workforce';
 import { billingRoutes } from './routes/billing';
 const app = new Hono<{ Bindings: Env }>();
-app.use('*', errorMiddleware);
+app.use('*', cors({
+  origin: (origin, c) => {
+    const allowedOrigins = (c.env.ALLOWED_ORIGINS ?? '').split(',').map((value: string) => value.trim()).filter(Boolean);
+    return allowedOrigins.includes(origin) ? origin : null;
+  },
+  allowMethods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowHeaders: ['Authorization', 'Content-Type'],
+  maxAge: 600,
+}));
+app.onError(errorHandler);
 app.route('/api/v1', healthRoutes);
 app.route('/api/v1', assistantRoutes);
 app.route('/api/v1', documentRoutes);

@@ -1,8 +1,8 @@
 {
-  "name": "og-workforce-api",
+  "name": "og-workforce",
   "main": "src/index.ts",
   "compatibility_date": "2025-09-01",
   "compatibility_flags": ["nodejs_compat"],
-  "vars": { "AI_PROVIDER": "groq", "EMBEDDING_PROVIDER": "configured" },
+  "vars": { "AI_PROVIDER": "groq", "EMBEDDING_PROVIDER": "configured", "ALLOWED_ORIGINS": "https://og-workforce.vercel.app", "SUPABASE_URL": "https://djxiieetcvnxmrlgumnr.supabase.co", "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_iU_yItl0AuS-CeEyERwVZg_UH-nZNji" },
   "triggers": { "crons": ["15 6 * * *"] }
 }
