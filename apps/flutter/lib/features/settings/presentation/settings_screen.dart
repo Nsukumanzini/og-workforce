@@ -45,6 +45,7 @@ class SettingsScreen extends ConsumerWidget {
           ]),
           const SizedBox(height: 18),
           _SettingsSection(title: 'Integrations', children: [
+            _SettingsTile(icon: Icons.link_outlined, title: 'Integrations overview', subtitle: 'Review secure connection status for your channels', onTap: () => context.go('/integrations')),
             _SettingsTile(icon: Icons.chat_bubble_outline_rounded, title: 'WhatsApp', subtitle: 'Connection status and agent controls', onTap: () => context.go('/agents/whatsapp')),
             _SettingsTile(icon: Icons.email_outlined, title: 'Email', subtitle: 'Agent controls and reply policy', onTap: () => context.go('/agents/email')),
             _SettingsTile(icon: Icons.phone_in_talk_outlined, title: 'Voice', subtitle: 'Receptionist controls and call simulator', onTap: () => context.go('/agents/voice')),

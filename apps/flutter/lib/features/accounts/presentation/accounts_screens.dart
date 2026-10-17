@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../crm/crm_providers.dart';
-import '../../crm/data/crm_inbox_repository.dart';
 import '../accounts_providers.dart';
 
 class AccountsDashboard extends ConsumerWidget {

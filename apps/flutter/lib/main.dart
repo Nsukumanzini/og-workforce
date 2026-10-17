@@ -18,6 +18,7 @@ import 'features/email_agent/email_agent_providers.dart'; import 'features/email
 import 'features/voice_receptionist/voice_receptionist_providers.dart'; import 'features/voice_receptionist/data/voice_receptionist_repository.dart';
 import 'features/workforce/workforce_providers.dart'; import 'features/workforce/data/workforce_repository.dart';
 import 'features/billing/billing_providers.dart'; import 'features/billing/data/billing_repository.dart';
+import 'features/insights/insights_providers.dart'; import 'features/insights/data/workspace_insights_repository.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -97,6 +98,7 @@ Future<Widget> _initializeApplication(AppConfig config) async {
       voiceRepositoryProvider.overrideWithValue(VoiceReceptionistRepository(config.apiBaseUrl, client)),
       workforceRepositoryProvider.overrideWithValue(WorkforceRepository(config.apiBaseUrl, client)),
       billingRepositoryProvider.overrideWithValue(BillingRepository(config.apiBaseUrl, client)),
+      workspaceInsightsRepositoryProvider.overrideWithValue(WorkspaceInsightsRepository(config.apiBaseUrl, client)),
     ],
   ], child: const WorkforceApp());
 }

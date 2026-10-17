@@ -10,7 +10,7 @@ class WorkforceScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => Scaffold(
-    appBar: AppBar(title: const Text('AI Workforce')),
+    appBar: AppBar(title: const Text('AI Workforce'), actions: [IconButton(tooltip: 'Set up an AI agent', onPressed: () => context.go('/setup/agents'), icon: const Icon(Icons.add_circle_outline)), const SizedBox(width: 8)]),
     body: ref.watch(workforceSummaryProvider).when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => Center(child: Padding(padding: const EdgeInsets.all(24), child: Text('$error', textAlign: TextAlign.center))),

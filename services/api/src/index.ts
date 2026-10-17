@@ -14,6 +14,7 @@ import { tenderRoutes } from './routes/tenders';
 import { runTenderAgent } from './agent-runtime/tender_dispatcher';
 import { workforceRoutes } from './routes/workforce';
 import { billingRoutes } from './routes/billing';
+import { workspaceInsightsRoutes } from './routes/workspace_insights';
 const app = new Hono<{ Bindings: Env }>();
 app.use('*', cors({
   origin: (origin, c) => {
@@ -34,6 +35,7 @@ app.route('/api/v1', accountsRoutes);
 app.route('/api/v1', tenderRoutes);
 app.route('/api/v1', workforceRoutes);
 app.route('/api/v1', billingRoutes);
+app.route('/api/v1', workspaceInsightsRoutes);
 export default app;
 export const scheduled = async (_event: ScheduledEvent, env: Env, ctx: ExecutionContext) => {
   const repo = new SupabaseRuntimeRepository(env.SUPABASE_URL, serverSupabaseKey(env));

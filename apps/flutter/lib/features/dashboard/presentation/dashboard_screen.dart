@@ -4,12 +4,17 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/app_providers.dart';
 import '../../../app/theme/workforce_theme.dart';
+import '../../workforce/workforce_providers.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
   static const _modules = <_ModuleInfo>[
     _ModuleInfo('AI Workforce', 'Your digital team, ready to work.', Icons.hub_outlined, '/workforce', Color(0xFFE7F3EC)),
+    _ModuleInfo('Set up agents', 'Choose a task and configure an AI teammate.', Icons.playlist_add_check_circle_outlined, '/setup/agents', Color(0xFFEAF2F2)),
+    _ModuleInfo('Approvals', 'Review actions that need your decision.', Icons.pending_actions_outlined, '/approvals', Color(0xFFF8EFE2)),
+    _ModuleInfo('Integrations', 'Connect the channels your team uses.', Icons.link_outlined, '/integrations', Color(0xFFEAF0F8)),
+    _ModuleInfo('Performance', 'See activity across agents and operations.', Icons.insights_outlined, '/reports', Color(0xFFF1ECF8)),
     _ModuleInfo('Unified Inbox', 'Bring every conversation together.', Icons.forum_outlined, '/inbox', Color(0xFFEAF0F8)),
     _ModuleInfo('CRM', 'Keep customer relationships in view.', Icons.people_alt_outlined, '/crm', Color(0xFFF8EFE2)),
     _ModuleInfo('Business Brain', 'Give your team the right context.', Icons.lightbulb_outline_rounded, '/business-brain', Color(0xFFF1ECF8)),
@@ -26,6 +31,7 @@ class DashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final workspace = ref.watch(workspaceControllerProvider).value;
+    final workforce = ref.watch(workforceSummaryProvider);
     final width = MediaQuery.sizeOf(context).width;
 
     return Scaffold(
@@ -69,6 +75,17 @@ class DashboardScreen extends ConsumerWidget {
                 Text('Everything your team needs to move work forward.', style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
               const SizedBox(height: 28),
               _OverviewBanner(onOpen: () => context.go('/business-brain')),
+              const SizedBox(height: 14),
+              workforce.when(
+                loading: () => const LinearProgressIndicator(),
+                error: (_, __) => const SizedBox.shrink(),
+                data: (summary) => _ActionStrip(
+                  pendingApprovals: summary['pendingApprovals'] ?? 0,
+                  onApprovals: () => context.go('/approvals'),
+                  onInbox: () => context.go('/inbox'),
+                  onSetUp: () => context.go('/setup/agents'),
+                ),
+              ),
               const SizedBox(height: 31),
               Row(children: [
                 Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -109,6 +126,19 @@ class DashboardScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+class _ActionStrip extends StatelessWidget {
+  const _ActionStrip({required this.pendingApprovals, required this.onApprovals, required this.onInbox, required this.onSetUp});
+  final dynamic pendingApprovals;
+  final VoidCallback onApprovals, onInbox, onSetUp;
+
+  @override
+  Widget build(BuildContext context) => Wrap(spacing: 10, runSpacing: 10, children: [
+    ActionChip(avatar: const Icon(Icons.pending_actions_outlined, size: 18), label: Text('$pendingApprovals approvals to review'), onPressed: onApprovals),
+    ActionChip(avatar: const Icon(Icons.forum_outlined, size: 18), label: const Text('Open inbox'), onPressed: onInbox),
+    ActionChip(avatar: const Icon(Icons.playlist_add_check_circle_outlined, size: 18), label: const Text('Set up an AI agent'), onPressed: onSetUp),
+  ]);
 }
 
 class _OverviewBanner extends StatelessWidget {

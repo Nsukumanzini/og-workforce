@@ -8,9 +8,6 @@ import '../../features/business_brain/presentation/business_brain_screen.dart';
 import '../../features/business_brain/presentation/business_brain_module_screen.dart';
 import '../../features/business_brain/presentation/company_profile_screen.dart';
 import '../../features/business_brain/presentation/business_hours_screen.dart';
-import '../../features/business_brain/presentation/organisation_structure_screen.dart';
-import '../../features/business_brain/presentation/commercial_core_screen.dart';
-import '../../features/business_brain/presentation/knowledge_communication_screens.dart';
 import '../../features/business_brain/presentation/document_vault_screen.dart';
 import '../../features/business_brain/presentation/business_brain_activity_screen.dart';
 import '../../features/agents/presentation/business_assistant_screen.dart';
@@ -28,6 +25,7 @@ import '../../features/crm/presentation/whatsapp_agent_screen.dart';
 import '../../features/accounts/presentation/accounts_screens.dart'; import '../../features/accounts/presentation/accounts_admin_screens.dart';
 import '../../features/accounts/presentation/invoice_edit_screen.dart'; import '../../features/accounts/presentation/accounts_policy_screen.dart';
 import '../../features/tenders/presentation/tender_screens.dart';
+import '../../features/insights/presentation/workspace_tools_screens.dart';
 
 String? appRouteRedirect({
   required AuthState auth,
@@ -40,7 +38,7 @@ String? appRouteRedirect({
   if (path == '/reset-password') return null;
   final currentWorkspace = workspace.value;
   if (currentWorkspace == null || !currentWorkspace.onboardingComplete) return path == '/onboarding' ? null : '/onboarding';
-  if (path == '/dashboard' || path == '/workforce' || path == '/billing' || path == '/settings' || path == '/business-brain' || path.startsWith('/business-brain/') || path == '/agents/business-assistant' || path == '/agents/email' || path == '/agents/voice' || path == '/crm' || path.startsWith('/crm/') || path == '/inbox' || path.startsWith('/inbox/') || path == '/agents/whatsapp' || path == '/accounts' || path.startsWith('/accounts/') || path == '/agents/accounts' || path == '/tenders' || path.startsWith('/tenders/')) return null;
+  if (path == '/dashboard' || path == '/workforce' || path == '/billing' || path == '/settings' || path == '/business-brain' || path.startsWith('/business-brain/') || path == '/agents/business-assistant' || path == '/agents/email' || path == '/agents/voice' || path == '/crm' || path.startsWith('/crm/') || path == '/inbox' || path.startsWith('/inbox/') || path == '/agents/whatsapp' || path == '/accounts' || path.startsWith('/accounts/') || path == '/agents/accounts' || path == '/tenders' || path.startsWith('/tenders/') || path == '/approvals' || path == '/integrations' || path == '/reports' || path == '/setup/agents') return null;
   return '/dashboard';
 }
 
@@ -60,6 +58,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/onboarding', builder: (_, __) => const WorkspaceOnboardingScreen()),
       GoRoute(path: '/dashboard', builder: (_, __) => const DashboardScreen()),
       GoRoute(path: '/workforce', builder: (_, __) => const WorkforceScreen()),
+      GoRoute(path: '/setup/agents', builder: (_, __) => const AgentSetupScreen()),
+      GoRoute(path: '/integrations', builder: (_, __) => const IntegrationsScreen()),
+      GoRoute(path: '/reports', builder: (_, __) => const ReportsScreen()),
+      GoRoute(path: '/approvals', builder: (_, __) => const AccountsApprovalsScreen()),
       GoRoute(path: '/billing', builder: (_, __) => const BillingScreen()),
       GoRoute(path: '/settings', builder: (_, __) => const SettingsScreen()),
       GoRoute(path: '/agents/business-assistant', builder: (_, __) => const BusinessAssistantScreen()),

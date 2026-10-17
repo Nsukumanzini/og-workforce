@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
-class CrmContact { CrmContact.fromJson(Map<String,dynamic> j):id='${j['id']}',name='${j['full_name']??'Unnamed contact'}',phone='${j['whatsapp_number']??j['phone']??''}',email='${j['email']??''}',company='${j['company_name']??''}',status='${j['lifecycle_status']??''}',notes='${j['notes']??''}'; final String id,name,phone,email,company,status,notes; }
+class CrmContact { CrmContact.fromJson(Map<String,dynamic> j):id='${j['id']}',name='${j['full_name']??'Unnamed contact'}',phone='${j['phone']??''}',whatsappNumber='${j['whatsapp_number']??''}',email='${j['email']??''}',company='${j['company_name']??''}',status='${j['lifecycle_status']??''}',notes='${j['notes']??''}'; final String id,name,phone,whatsappNumber,email,company,status,notes; }
 class WhatsAppAgentState { WhatsAppAgentState.fromJson(Map<String,dynamic> j):id='${j['id']}',status='${j['status']??'paused'}'; final String id,status; bool get active=>status=='active'; }
 class InboxConversation { InboxConversation.fromJson(Map<String,dynamic> j):id='${j['id']}',contactId='${j['contact_id']??''}',status='${j['status']??'open'}',channel='${j['channel_key']??'whatsapp'}',lastActivity='${j['last_activity_at']??''}'; final String id,contactId,status,channel,lastActivity; }
 class UnifiedMessage { UnifiedMessage.fromJson(Map<String,dynamic> j):id='${j['id']}',content='${j['content']??''}',direction='${j['direction']??''}',status='${j['delivery_status']??''}',agent=j['agent_generated']==true,human=j['human_generated']==true,created='${j['created_at']??''}'; final String id,content,direction,status,created; final bool agent,human; }
